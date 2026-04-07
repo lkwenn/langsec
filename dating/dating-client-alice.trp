@@ -8,11 +8,12 @@ let
    val gender = true raisedTo lev
    val interests = ["baking", "reading", "football"] raisedTo lev
    val profile = (lev, name, year, gender, interests)
+   
 
 
    fun agent (levRcv, nameRcv, yearRcv, genderRcv, interestsRcv) =
       let val older = declassify_with_block(year > yearRcv, authority, levRcv)
-         val likes = declassify_with_block(elem "football" interests, authority, levRcv)
+         val likes = declassify_with_block(elem "football" interestsRcv, authority, levRcv)
          val preference = declassify_with_block(older andalso likes, authority, levRcv)
          val maybeProfile = if preference
             then declassifydeep(profile, authority, levRcv)
@@ -22,6 +23,7 @@ let
 
     fun loop matches =
         let val match = receive [ hn ("NEWMATCH", data) => data]
+            val _ = printWithLabels("NEW MATCH")
             val _ = print match
             val allMatches = append matches [match]
         in loop allMatches
@@ -30,8 +32,8 @@ let
     fun main () =
         let val pid = self()
             val message = ("NEWPROFILE", (profile, agent, pid))
-            val datingServer = whereis ("QmX4UF99UuUotzuvF4PK9CXMUVp6jYmR6CDpcfG1wZNobX", "dating-server")
-            val _ = send(dating-server, message)
+            val datingServer = whereis ("QmZuTiRquPhNu2VsEpUAvDrkMmNYeCm18viY8YsLbm7Kir", "datingServer")
+            val _ = send(datingServer, message)
         in loop []
         end
 

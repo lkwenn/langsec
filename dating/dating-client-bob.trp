@@ -1,0 +1,40 @@
+import lists
+import declassifyutil
+
+let
+   val lev = `{bob}`
+   val name = "Bob" raisedTo lev
+   val year = 1992 raisedTo lev
+   val gender = false raisedTo lev
+   val interests = ["cooking", "football", "hiking"] raisedTo lev
+   val profile = (lev, name, year, gender, interests)
+   
+
+   fun agent (levRcv, nameRcv, yearRcv, genderRcv, interestsRcv) =
+      let val likesBaking = declassify_with_block(elem "baking" interestsRcv, authority, levRcv)
+          val isOlder = declassify_with_block(yearRcv > year, authority, levRcv)
+          val preference = declassify_with_block(likesBaking andalso isOlder, authority, levRcv)
+          val maybeProfile = if preference
+             then declassifydeep(profile, authority, levRcv)
+             else ()
+      in (preference, maybeProfile)
+      end
+
+    fun loop matches =
+        let val match = receive [ hn ("NEWMATCH", data) => data]
+            val _ = printWithLabels("NEW MATCH")
+            val _ = print match
+            val allMatches = append matches [match]
+        in loop allMatches
+        end
+
+    fun main () =
+        let val pid = self()
+            val message = ("NEWPROFILE", (profile, agent, pid))
+            val datingServer = whereis ("QmZuTiRquPhNu2VsEpUAvDrkMmNYeCm18viY8YsLbm7Kir", "datingServer")
+            val _ = send(datingServer, message)
+        in loop []
+        end
+
+in main ()
+end

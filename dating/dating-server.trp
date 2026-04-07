@@ -1,24 +1,42 @@
-(* Starting file for the server *)
-
 import lists
-let fun server () = (* TODO: finish this *)
-         let val _ = receive [hn ("NEWPROFILE", _ )
-                                => printString "New profile received"
-                             ]
-         in server ()
-         end
+import declassifyutil
 
-    (* Our main function starts the server and then requests the
-       dispatcher to send some clients this way. *)
+let
+    fun tryMatch (profile1, agent1, pid1, profile2, agent2, pid2) =
+    let val (pref1, maybeProf1) = agent1 profile2
+        val (pref2, maybeProf2) = agent2 profile1
+        val dpref1 = declassify_with_block(pref1, authority, `{}`)
+        val dpref2 = declassify_with_block(pref2, authority, `{}`)
+    in if dpref1 andalso dpref2
+   then ( printString "Mutual match found"
+        ; print profile1
+        ; print profile2
+        ; send (pid1, ("NEWMATCH", declassify_with_block(maybeProf2, authority, `{}`)))
+        ; send (pid2, ("NEWMATCH", declassify_with_block(maybeProf1, authority, `{}`)))
+        )
+   else ()
+end
 
-    fun main () =       
+    fun matchNewProfile (newEntry, profiles) =
+        let val (profile, agent, pid) = newEntry
+        in map (fn (p2, a2, pid2) =>
+                    tryMatch (profile, agent, pid, p2, a2, pid2))
+               profiles
+        end
+
+    fun server profiles =
+        let val newEntry = receive [hn ("NEWPROFILE", data) => data]
+            val _ = printString "New profile received"
+            val _ = matchNewProfile (newEntry, profiles)
+        in server (append profiles [newEntry])
+        end
+
+    fun main () =
         let val thisNode = node (self ())
             val _ = printString ("Running node with identifier: " ^ thisNode)
-            val _ =  register ("datingServer", spawn server, authority)
-        in  (* TODO: Feel free to comment out the next line
-                     while you develop your solution and work on a few 
-                     custom clients;  *)
-            send (whereis ("@dispatcher", "dispatcher"), ("DISPATCH", thisNode)); 
+            val _ = register ("datingServer", spawn (fn () => server []), authority)
+        in  (* Uncomment for testing with course dispatcher: *)
+            send (whereis ("@dispatcher", "dispatcher"), ("DISPATCH", thisNode));
             ()
         end
 in main ()
