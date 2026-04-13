@@ -11,9 +11,9 @@ let
    
 
    fun agent (levRcv, nameRcv, yearRcv, genderRcv, interestsRcv) =
-      let val likesBaking = declassify_with_block(elem "baking" interestsRcv, authority, levRcv)
-          val isOlder = declassify_with_block(yearRcv > year, authority, levRcv)
-          val preference = declassify_with_block(likesBaking andalso isOlder, authority, levRcv)
+      let val likesBaking = elem "baking" interestsRcv
+          val younger = declassify_with_block(yearRcv > year, authority, levRcv)
+          val preference = declassify_with_block(likesBaking andalso younger, authority, levRcv)
           val maybeProfile = if preference
              then declassifydeep(profile, authority, levRcv)
              else ()
