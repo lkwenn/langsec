@@ -9,11 +9,3 @@ dating-alice:
 dating-bob:
 	$(TROUPE)/bin/troupec dating-client-bob.trp -o ./out/dating-client-bob.js
 	node $(TROUPE)/rt/built/troupe.js -f=./out/dating-client-bob.js --id=../ids/bob.json --trustmap=../trustmaps/client-bob.json
-
-dating-mallory1:
-	$(TROUPE)/bin/troupec dating-client-mallory1.trp -o ./out/dating-client-mallory1.js
-	node $(TROUPE)/rt/built/troupe.js -f=./out/dating-client-mallory1.js --id=../ids/mallory.json --trustmap=../trustmaps/client-mallory.json
-
-dating-mallory2:
-	$(TROUPE)/bin/troupec dating-client-mallory2.trp -o ./out/dating-client-mallory2.js
-	node $(TROUPE)/rt/built/troupe.js -f=./out/dating-client-mallory2.js --id=../ids/mallory.json --trustmap=../trustmaps/client-mallory.json
