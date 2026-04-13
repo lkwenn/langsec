@@ -8,12 +8,15 @@ let
         val dpref1 = declassify_with_block(pref1, authority, `{}`)
         val dpref2 = declassify_with_block(pref2, authority, `{}`)
     in if dpref1 andalso dpref2
-   then ( printString "Mutual match found"
-        ; print profile1
-        ; print profile2
-        ; send (pid1, ("NEWMATCH", declassify_with_block(maybeProf2, authority, `{}`)))
-        ; send (pid2, ("NEWMATCH", declassify_with_block(maybeProf1, authority, `{}`)))
-        )
+   then let val (_, name1, _, _, _) = profile1
+            val (_, name2, _, _, _) = profile2
+        in ( printString "Mutual match found"
+           ; print name1
+           ; print name2
+           ; send (pid1, ("NEWMATCH", declassify_with_block(maybeProf2, authority, `{}`)))
+           ; send (pid2, ("NEWMATCH", declassify_with_block(maybeProf1, authority, `{}`)))
+           )
+        end
    else ()
 end
 
